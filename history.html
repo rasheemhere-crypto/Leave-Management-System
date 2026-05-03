@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LeaveFlow – Leave History</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+  <nav class="sidebar">
+    <div class="logo">Leave<span>Flow</span></div>
+    <ul>
+      <li><a href="index.html">⬛ Dashboard</a></li>
+      <li><a href="apply.html">✏️ Apply Leave</a></li>
+      <li class="active"><a href="history.html">📋 Leave History</a></li>
+      <li><a href="approval.html">✅ Approvals</a></li>
+    </ul>
+    <div class="sidebar-user">
+      <div class="avatar">AH</div>
+      <div><div class="uname">Mohomed Rasheem</div><div class="urole">HR Admin</div></div>
+    </div>
+  </nav>
+
+  <main class="content">
+    <header class="topbar">
+      <div class="page-head">
+        <h1>Leave History</h1>
+        <p>All submitted leave requests and their statuses</p>
+      </div>
+    </header>
+
+    <div class="filter-bar">
+      <select id="filterStatus" onchange="renderTable()">
+        <option value="">All Statuses</option>
+        <option value="Pending">Pending</option>
+        <option value="Approved">Approved</option>
+        <option value="Rejected">Rejected</option>
+      </select>
+      <select id="filterType" onchange="renderTable()">
+        <option value="">All Types</option>
+        <option value="Casual">Casual</option>
+        <option value="Sick">Sick</option>
+        <option value="Annual">Annual</option>
+      </select>
+      <input type="text" id="searchName" placeholder="Search by name..." oninput="renderTable()"/>
+    </div>
+
+    <div class="table-box">
+      <table id="historyTable">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Employee Name</th>
+            <th>Department</th>
+            <th>Leave Type</th>
+            <th>From</th>
+            <th>To</th>
+            <th>Reason</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="historyBody"></tbody>
+      </table>
+      <p id="emptyMsg" style="text-align:center; color:var(--muted); padding:28px; display:none;">No leave records found.</p>
+    </div>
+  </main>
+
+  <script>
+    const dummy = [
+      { id:'LV-1001', empName:'Imaadh', dept:'Engineering', type:'Sick', from:'2026-05-01', to:'2026-05-02', reason:'Fever and flu', status:'Pending' },
+      { id:'LV-1002', empName:'Mazeen', dept:'HR', type:'Casual', from:'2026-04-28', to:'2026-04-28', reason:'Personal work', status:'Approved' },
+      { id:'LV-1003', empName:'Nida Baig', dept:'Finance', type:'Annual', from:'2026-04-25', to:'2026-04-30', reason:'Family vacation', status:'Approved' },
+      { id:'LV-1004', empName:'Afnan', dept:'IT', type:'Casual', from:'2026-05-02', to:'2026-05-03', reason:'Home maintenance', status:'Pending' },
+      { id:'LV-1005', empName:'Zara Malik', dept:'Marketing', type:'Annual', from:'2026-05-10', to:'2026-05-17', reason:'Travel abroad', status:'Rejected' },
+      { id:'LV-1006', empName:'Bilal Shah', dept:'Operations', type:'Sick', from:'2026-04-20', to:'2026-04-21', reason:'Medical appointment', status:'Approved' },
+      { id:'LV-1007', empName:'Naflan', dept:'Engineering', type:'Casual', from:'2026-05-05', to:'2026-05-05', reason:'Bank work', status:'Pending' },
+    ];
+
+    function getAllLeaves() {
+      const stored = JSON.parse(localStorage.getItem('leaveRequests') || '[]');
+      return [...dummy, ...stored];
+    }
+
+    function renderTable() {
+      const status = document.getElementById('filterStatus').value;
+      const type = document.getElementById('filterType').value;
+      const search = document.getElementById('searchName').value.toLowerCase();
+
+      let data = getAllLeaves().filter(r => {
+        return (!status || r.status === status)
+          && (!type || r.type === type)
+          && (!search || r.empName.toLowerCase().includes(search));
+      });
+
+      const body = document.getElementById('historyBody');
+      const emptyMsg = document.getElementById('emptyMsg');
+
+      if (data.length === 0) {
+        body.innerHTML = '';
+        emptyMsg.style.display = 'block';
+        return;
+      }
+      emptyMsg.style.display = 'none';
+
+      body.innerHTML = data.map(r => `
+        <tr>
+          <td style="color:var(--muted); font-size:0.8rem;">${r.id}</td>
+          <td><strong>${r.empName}</strong></td>
+          <td>${r.dept}</td>
+          <td>${r.type}</td>
+          <td>${r.from}</td>
+          <td>${r.to}</td>
+          <td style="max-width:180px; color:var(--muted); font-size:0.85rem;">${r.reason}</td>
+          <td><span class="badge ${r.status.toLowerCase()}">${r.status}</span></td>
+        </tr>
+      `).join('');
+    }
+
+    renderTable();
+  </script>
+</body>
+</html>

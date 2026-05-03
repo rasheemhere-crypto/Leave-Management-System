@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LeaveFlow – Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+  <nav class="sidebar">
+    <div class="logo">Leave<span>Flow</span></div>
+    <ul>
+      <li class="active"><a href="index.html">⬛ Dashboard</a></li>
+      <li><a href="apply.html">✏️ Apply Leave</a></li>
+      <li><a href="history.html">📋 Leave History</a></li>
+      <li><a href="approval.html">✅ Approvals</a></li>
+    </ul>
+    <div class="sidebar-user">
+      <div class="avatar">AH</div>
+      <div>
+        <div class="uname">Mohomed Rasheem</div>
+        <div class="urole">HR Admin</div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="content">
+    <header class="topbar">
+      <div>
+        <h1>Dashboard</h1>
+        <p class="subtitle">Welcome back, Mohomed Rasheem👋</p>
+      </div>
+      <div class="date-badge">Saturday, 02 May 2026</div>
+    </header>
+
+    <section class="cards">
+      <div class="card card-blue">
+        <div class="card-icon">👥</div>
+        <div class="card-num">124</div>
+        <div class="card-label">Total Employees</div>
+      </div>
+      <div class="card card-yellow">
+        <div class="card-icon">📝</div>
+        <div class="card-num">38</div>
+        <div class="card-label">Leaves Applied</div>
+      </div>
+      <div class="card card-orange">
+        <div class="card-icon">⏳</div>
+        <div class="card-num">11</div>
+        <div class="card-label">Pending Approvals</div>
+      </div>
+      <div class="card card-green">
+        <div class="card-icon">✅</div>
+        <div class="card-num">23</div>
+        <div class="card-label">Approved Leaves</div>
+      </div>
+    </section>
+
+    <section class="charts-row">
+      <div class="chart-box">
+        <h2>Leaves Per Month</h2>
+        <canvas id="monthChart" width="420" height="220"></canvas>
+      </div>
+      <div class="chart-box">
+        <h2>Leave Type Distribution</h2>
+        <canvas id="typeChart" width="260" height="220"></canvas>
+      </div>
+    </section>
+
+    <section class="recent-table">
+      <h2>Recent Leave Requests</h2>
+      <table>
+        <thead>
+          <tr><th>Employee</th><th>Dept</th><th>Type</th><th>From</th><th>To</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Sara Khan</td><td>Engineering</td><td>Sick</td><td>01 May</td><td>02 May</td><td><span class="badge pending">Pending</span></td></tr>
+          <tr><td>Usman Ali</td><td>HR</td><td>Casual</td><td>28 Apr</td><td>28 Apr</td><td><span class="badge approved">Approved</span></td></tr>
+          <tr><td>Nida Baig</td><td>Finance</td><td>Annual</td><td>25 Apr</td><td>30 Apr</td><td><span class="badge approved">Approved</span></td></tr>
+          <tr><td>Hamza Raza</td><td>IT</td><td>Casual</td><td>02 May</td><td>03 May</td><td><span class="badge pending">Pending</span></td></tr>
+          <tr><td>Zara Malik</td><td>Marketing</td><td>Annual</td><td>10 May</td><td>17 May</td><td><span class="badge rejected">Rejected</span></td></tr>
+        </tbody>
+      </table>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    // Month chart
+    new Chart(document.getElementById('monthChart'), {
+      type: 'bar',
+      data: {
+        labels: ['Jan','Feb','Mar','Apr','May','Jun'],
+        datasets: [{
+          label: 'Leaves',
+          data: [5,8,6,10,9,7],
+          backgroundColor: '#f59e0b',
+          borderRadius: 8,
+        }]
+      },
+      options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+    });
+    // Type chart
+    new Chart(document.getElementById('typeChart'), {
+      type: 'doughnut',
+      data: {
+        labels: ['Casual','Sick','Annual'],
+        datasets: [{ data: [14,9,15], backgroundColor: ['#3b82f6','#f59e0b','#10b981'], borderWidth: 0 }]
+      },
+      options: { plugins: { legend: { position: 'bottom' } } }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LeaveFlow – Approvals</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+  <nav class="sidebar">
+    <div class="logo">Leave<span>Flow</span></div>
+    <ul>
+      <li><a href="index.html">⬛ Dashboard</a></li>
+      <li><a href="apply.html">✏️ Apply Leave</a></li>
+      <li><a href="history.html">📋 Leave History</a></li>
+      <li class="active"><a href="approval.html">✅ Approvals</a></li>
+    </ul>
+    <div class="sidebar-user">
+      <div class="avatar">AH</div>
+      <div><div class="uname">Mohomed Rasheem</div><div class="urole">HR Admin</div></div>
+    </div>
+  </nav>
+
+  <main class="content">
+    <header class="topbar">
+      <div class="page-head">
+        <h1>Approval Center</h1>
+        <p>Two-stage approval: Department Head → HR Admin</p>
+      </div>
+    </header>
+
+    <!-- Stage toggle -->
+    <div style="display:flex; gap:12px; margin-bottom:24px;">
+      <button class="stage-btn active" id="btn-dept" onclick="switchStage('dept')">
+        🏢 Stage 1 – Department Head
+      </button>
+      <button class="stage-btn" id="btn-hr" onclick="switchStage('hr')">
+        👔 Stage 2 – HR Admin
+      </button>
+    </div>
+
+    <div id="stage-dept">
+      <div class="table-box">
+        <h2>Pending – Department Head Review</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th><th>Employee</th><th>Dept</th><th>Type</th>
+              <th>From</th><th>To</th><th>Reason</th>
+              <th>Dept Head</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="deptBody"></tbody>
+        </table>
+        <p id="deptEmpty" style="text-align:center; color:var(--muted); padding:28px; display:none;">No requests pending department approval.</p>
+      </div>
+    </div>
+
+    <div id="stage-hr" style="display:none;">
+      <div class="table-box">
+        <h2>Pending – HR Admin Final Approval</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th><th>Employee</th><th>Dept</th><th>Type</th>
+              <th>From</th><th>To</th><th>Dept Head</th><th>HR Status</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="hrBody"></tbody>
+        </table>
+        <p id="hrEmpty" style="text-align:center; color:var(--muted); padding:28px; display:none;">No requests pending HR approval.</p>
+      </div>
+    </div>
+
+  </main>
+
+  <style>
+    .stage-btn {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      color: var(--muted);
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-family: var(--font-head);
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .stage-btn.active {
+      background: var(--accent);
+      color: #000;
+      border-color: var(--accent);
+    }
+  </style>
+
+  <script>
+    const dummyPending = [
+      { id:'LV-1001', empName:'Imaadh', dept:'Engineering', type:'Sick', from:'2026-05-01', to:'2026-05-02', reason:'Fever', deptHead:'Pending', hr:'Pending', status:'Pending' },
+      { id:'LV-1004', empName:'Afnan', dept:'IT', type:'Casual', from:'2026-05-02', to:'2026-05-03', reason:'Home work', deptHead:'Pending', hr:'Pending', status:'Pending' },
+      { id:'LV-1007', empName:'Naflan', dept:'Engineering', type:'Casual', from:'2026-05-05', to:'2026-05-05', reason:'Bank errand', deptHead:'Approved', hr:'Pending', status:'Pending' },
+    ];
+
+    function getAll() {
+      const stored = JSON.parse(localStorage.getItem('leaveRequests') || '[]');
+      const combined = [...dummyPending, ...stored.filter(r => r.status === 'Pending')];
+      return combined;
+    }
+
+    function saveAll(data) {
+      const stored = JSON.parse(localStorage.getItem('leaveRequests') || '[]');
+      // update stored entries
+      const updatedStored = stored.map(s => {
+        const match = data.find(d => d.id === s.id);
+        return match || s;
+      });
+      localStorage.setItem('leaveRequests', JSON.stringify(updatedStored));
+    }
+
+    let leaves = getAll();
+
+    function renderDept() {
+      const deptLeaves = leaves.filter(r => r.deptHead === 'Pending');
+      const body = document.getElementById('deptBody');
+      const empty = document.getElementById('deptEmpty');
+      if (deptLeaves.length === 0) { body.innerHTML = ''; empty.style.display='block'; return; }
+      empty.style.display = 'none';
+      body.innerHTML = deptLeaves.map((r,i) => `
+        <tr id="dept-row-${i}">
+          <td style="color:var(--muted); font-size:0.8rem;">${r.id}</td>
+          <td><strong>${r.empName}</strong></td>
+          <td>${r.dept}</td>
+          <td>${r.type}</td>
+          <td>${r.from}</td>
+          <td>${r.to}</td>
+          <td style="color:var(--muted); font-size:0.82rem;">${r.reason}</td>
+          <td><span class="badge pending">Pending</span></td>
+          <td>
+            <button class="btn-approve" onclick="deptAction('${r.id}','Approved')">✓ Approve</button>
+            <button class="btn-reject" onclick="deptAction('${r.id}','Rejected')">✗ Reject</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function renderHR() {
+      const hrLeaves = leaves.filter(r => r.deptHead === 'Approved' && r.hr === 'Pending');
+      const body = document.getElementById('hrBody');
+      const empty = document.getElementById('hrEmpty');
+      if (hrLeaves.length === 0) { body.innerHTML = ''; empty.style.display='block'; return; }
+      empty.style.display = 'none';
+      body.innerHTML = hrLeaves.map(r => `
+        <tr>
+          <td style="color:var(--muted); font-size:0.8rem;">${r.id}</td>
+          <td><strong>${r.empName}</strong></td>
+          <td>${r.dept}</td>
+          <td>${r.type}</td>
+          <td>${r.from}</td>
+          <td>${r.to}</td>
+          <td><span class="badge approved">Approved</span></td>
+          <td><span class="badge pending">Pending</span></td>
+          <td>
+            <button class="btn-approve" onclick="hrAction('${r.id}','Approved')">✓ Approve</button>
+            <button class="btn-reject" onclick="hrAction('${r.id}','Rejected')">✗ Reject</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function deptAction(id, decision) {
+      const r = leaves.find(l => l.id === id);
+      if (!r) return;
+      r.deptHead = decision;
+      if (decision === 'Rejected') { r.status = 'Rejected'; r.hr = 'N/A'; }
+      renderDept(); renderHR();
+    }
+
+    function hrAction(id, decision) {
+      const r = leaves.find(l => l.id === id);
+      if (!r) return;
+      r.hr = decision;
+      r.status = decision;
+      renderDept(); renderHR();
+    }
+
+    function switchStage(stage) {
+      document.getElementById('stage-dept').style.display = stage === 'dept' ? '' : 'none';
+      document.getElementById('stage-hr').style.display = stage === 'hr' ? '' : 'none';
+      document.getElementById('btn-dept').classList.toggle('active', stage === 'dept');
+      document.getElementById('btn-hr').classList.toggle('active', stage === 'hr');
+    }
+
+    renderDept();
+    renderHR();
+  </script>
+</body>
+</html>

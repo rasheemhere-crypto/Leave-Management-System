@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LeaveFlow – Apply Leave</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+  <nav class="sidebar">
+    <div class="logo">Leave<span>Flow</span></div>
+    <ul>
+      <li><a href="index.html">⬛ Dashboard</a></li>
+      <li class="active"><a href="apply.html">✏️ Apply Leave</a></li>
+      <li><a href="history.html">📋 Leave History</a></li>
+      <li><a href="approval.html">✅ Approvals</a></li>
+    </ul>
+    <div class="sidebar-user">
+      <div class="avatar">AH</div>
+      <div><div class="uname">Ali Hassan</div><div class="urole">HR Admin</div></div>
+    </div>
+  </nav>
+
+  <main class="content">
+    <header class="topbar">
+      <div class="page-head">
+        <h1>Apply Leave</h1>
+        <p>Submit a new leave request for approval</p>
+      </div>
+    </header>
+
+    <div class="alert success" id="successAlert">
+      ✅ Leave application submitted successfully! Your request is pending approval.
+    </div>
+
+    <div class="form-box">
+      <h2>Leave Application Form</h2>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Employee ID</label>
+          <input type="text" id="empId" placeholder="e.g. EMP-0042" value="EMP-0042"/>
+        </div>
+        <div class="form-group">
+          <label>Employee Name</label>
+          <input type="text" id="empName" placeholder="Full name" value="Mohomed Rasheem"/>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Department</label>
+        <select id="dept">
+          <option>Engineering</option>
+          <option>Human Resources</option>
+          <option>Finance</option>
+          <option>Marketing</option>
+          <option>IT</option>
+          <option>Operations</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Leave Type</label>
+        <select id="leaveType">
+          <option value="Casual">Casual Leave</option>
+          <option value="Sick">Sick Leave</option>
+          <option value="Annual">Annual Leave</option>
+        </select>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>From Date</label>
+          <input type="date" id="fromDate"/>
+        </div>
+        <div class="form-group">
+          <label>To Date</label>
+          <input type="date" id="toDate"/>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Reason</label>
+        <textarea id="reason" placeholder="Briefly describe the reason for your leave request..."></textarea>
+      </div>
+
+      <div style="display:flex; align-items:center; gap:16px; margin-top:8px;">
+        <button class="btn-primary" onclick="submitLeave()">Submit Application</button>
+        <span id="errorMsg" style="color:#f87171; font-size:0.85rem;"></span>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Set default dates
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('fromDate').value = today;
+    document.getElementById('toDate').value = today;
+
+    function submitLeave() {
+      const empId = document.getElementById('empId').value.trim();
+      const empName = document.getElementById('empName').value.trim();
+      const from = document.getElementById('fromDate').value;
+      const to = document.getElementById('toDate').value;
+      const reason = document.getElementById('reason').value.trim();
+      const errEl = document.getElementById('errorMsg');
+
+      if (!empId || !empName || !from || !to || !reason) {
+        errEl.textContent = '⚠ Please fill in all fields.';
+        return;
+      }
+      if (new Date(to) < new Date(from)) {
+        errEl.textContent = '⚠ End date cannot be before start date.';
+        return;
+      }
+      errEl.textContent = '';
+
+      // Save to localStorage
+      const existing = JSON.parse(localStorage.getItem('leaveRequests') || '[]');
+      existing.push({
+        id: 'LV-' + Math.floor(Math.random()*9000+1000),
+        empId, empName,
+        dept: document.getElementById('dept').value,
+        type: document.getElementById('leaveType').value,
+        from, to, reason,
+        status: 'Pending',
+        deptHead: 'Pending',
+        hr: 'Pending',
+        submittedAt: new Date().toLocaleDateString()
+      });
+      localStorage.setItem('leaveRequests', JSON.stringify(existing));
+
+      document.getElementById('successAlert').style.display = 'block';
+      document.getElementById('reason').value = '';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  </script>
+</body>
+</html>
